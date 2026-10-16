@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Arcade</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --fg: #9aa0b4;
+      --bright: #e4e6f0;
+      --muted: #5d6275;
+      --accent: #ffe14a;
+      --line: #23263a;
+    }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(ellipse at top, #0b0d1c 0%, #000 70%) #000;
+      color: var(--fg);
+      font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 16px 64px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      color: var(--accent);
+      font-size: 28px;
+      letter-spacing: 0.35em;
+    }
+    .lead { margin: 0 0 40px; color: var(--muted); }
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .game {
+      display: block;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #07081280;
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .game:hover, .game:focus-visible { border-color: #5a7dff; transform: translateY(-2px); outline: none; }
+    .game h2 { margin: 0 0 6px; color: var(--bright); font-size: 18px; letter-spacing: 0.2em; }
+    .game p { margin: 0 0 12px; }
+    .keys { color: var(--muted); font-size: 12px; }
+    .play { color: var(--accent); }
+    footer { margin-top: 56px; color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ARCADE</h1>
+    <p class="lead">Original games in the spirit of the early-80s arcades. They run in the browser, with a keyboard or a gamepad.</p>
+    <div class="games">
+      <a class="game" href="perseids/">
+        <h2>PERSEIDS</h2>
+        <p>A fixed shooter through ten worlds, each with its own monsters and boss, eight fighters to win, and perks and curses to catch or to dodge.</p>
+        <p class="keys">&larr; &rarr; move &middot; Space fire (hold for auto-fire) &middot; P pause &middot; M sound &middot; F full screen</p>
+        <span class="play">&#9654; PLAY</span>
+      </a>
+    </div>
+    <footer>All graphics, sounds and code are original. High scores stay in your browser.</footer>
+  </main>
+</body>
+</html>
