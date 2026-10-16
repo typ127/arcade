@@ -57,6 +57,23 @@
     .corner:hover { opacity: 1; color: #e4e6f0; }
     #back { top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); }
     #full { bottom: max(10px, env(safe-area-inset-bottom)); right: max(10px, env(safe-area-inset-right)); }
+    /* Controller diagnostics, only with ?pad in the address. */
+    #pad {
+      position: fixed;
+      z-index: 2;
+      top: max(44px, env(safe-area-inset-top));
+      left: max(10px, env(safe-area-inset-left));
+      margin: 0;
+      padding: 8px 10px;
+      max-width: calc(100vw - 40px);
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #3a3e55;
+      border-radius: 4px;
+      color: #9fe6ff;
+      font: 11px/1.4 ui-monospace, Menlo, monospace;
+      white-space: pre-wrap;
+      pointer-events: none;
+    }
     /* Nothing but the game in full screen. */
     html:fullscreen .corner, html.full .corner { display: none; }
   </style>
@@ -65,8 +82,10 @@
   <div class="screen">
     <canvas id="game" width="224" height="288" aria-label="PERSEIDS"></canvas>
   </div>
-  <a id="back" class="corner" href="../../">&larr; ARCADE</a>
-  <button id="full" class="corner" type="button" hidden>FULL SCREEN</button>
+  <!-- Out of the tab order: a focus jump (on an iPad also from the controller) must not leave the game. -->
+  <a id="back" class="corner" href="../../" tabindex="-1">&larr; ARCADE</a>
+  <button id="full" class="corner" type="button" tabindex="-1" hidden>FULL SCREEN</button>
+  <pre id="pad" hidden></pre>
 
   <script type="module">
     import { createPerseids } from './perseids.js';
@@ -87,6 +106,36 @@
     const sync = () => root.classList.toggle('full', !!(document.fullscreenElement ?? document.webkitFullscreenElement));
     document.addEventListener('fullscreenchange', sync);
     document.addEventListener('webkitfullscreenchange', sync);
+
+    // ?pad: live controller diagnostics (connected pads, pressed buttons, focus, keyboard events).
+    if (new URLSearchParams(location.search).has('pad')) {
+      const out = document.getElementById('pad');
+      out.hidden = false;
+      const log = [];
+      const note = (text) => {
+        log.unshift(`${(performance.now() / 1000).toFixed(1)}s ${text}`);
+        log.length = Math.min(log.length, 8);
+      };
+      for (const type of ['keydown', 'keyup']) {
+        window.addEventListener(type, (e) => note(`${type} code=${e.code} key=${e.key}${e.shiftKey ? ' +shift' : ''}`), true);
+      }
+      window.addEventListener('blur', () => note('window blur (page lost focus)'));
+      window.addEventListener('focus', () => note('window focus'));
+      document.addEventListener('focusin', (e) => note(`focus -> ${e.target.tagName.toLowerCase()}${e.target.id ? '#' + e.target.id : ''}`));
+      document.addEventListener('visibilitychange', () => note(`visibility ${document.visibilityState}`));
+      window.addEventListener('gamepadconnected', (e) => note(`gamepad connected #${e.gamepad.index}`));
+      window.addEventListener('gamepaddisconnected', (e) => note(`gamepad disconnected #${e.gamepad.index}`));
+      const show = () => {
+        const pads = Array.from(navigator.getGamepads?.() ?? []).filter(Boolean);
+        const lines = pads.map((p) => {
+          const down = p.buttons.map((b, i) => (b.pressed ? i : -1)).filter((i) => i >= 0);
+          return `#${p.index} ${p.connected ? '' : '(gone) '}${p.mapping || 'no mapping'} ${p.id.slice(0, 40)}\n   buttons [${down.join(' ')}] axes ${p.axes.slice(0, 2).map((a) => a.toFixed(2)).join(' ')}`;
+        });
+        out.textContent = [`focus: ${document.hasFocus() ? 'page' : 'NOT the page'}, active: ${document.activeElement?.tagName.toLowerCase()}`, ...(lines.length ? lines : ['no gamepad (press a button)']), '', ...log].join('\n');
+        requestAnimationFrame(show);
+      };
+      show();
+    }
   </script>
 </body>
 </html>
