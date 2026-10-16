@@ -90,7 +90,9 @@
     import { createPerseids } from './perseids.js';
 
     const root = document.documentElement;
-    createPerseids(document.getElementById('game'), { fullscreenElement: root });
+    // The world high score list (arcade-api on Cloudflare Workers). The test page goes without it: its test keys allow cheating.
+    const scoreServer = 'https://arcade-scores.arcade-api.workers.dev';
+    createPerseids(document.getElementById('game'), { fullscreenElement: root, scoreServer });
 
     // Full screen without a keyboard (F also works): iPad and desktop browsers; iPhones have no full screen API.
     const full = document.getElementById('full');
