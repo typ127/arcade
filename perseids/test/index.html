@@ -57,6 +57,17 @@
     .corner:hover { opacity: 1; color: #e4e6f0; }
     #back { top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); }
     #full { bottom: max(10px, env(safe-area-inset-bottom)); right: max(10px, env(safe-area-inset-right)); }
+    /* Replay files (test page only). */
+    #replays {
+      position: fixed;
+      z-index: 1;
+      top: max(10px, env(safe-area-inset-top));
+      right: max(10px, env(safe-area-inset-right));
+      display: flex;
+      gap: 6px;
+    }
+    #replays[hidden] { display: none; }
+    #replays .corner { position: static; }
     /* Controller diagnostics, only with ?pad in the address. */
     #pad {
       position: fixed;
@@ -76,6 +87,7 @@
     }
     /* Nothing but the game in full screen. */
     html:fullscreen .corner, html.full .corner { display: none; }
+    html:fullscreen #replays, html.full #replays { display: none; }
   </style>
 </head>
 <body>
@@ -85,6 +97,12 @@
   <!-- Out of the tab order: a focus jump (on an iPad also from the controller) must not leave the game. -->
   <a id="back" class="corner" href="../../" tabindex="-1">&larr; ARCADE</a>
   <button id="full" class="corner" type="button" tabindex="-1" hidden>FULL SCREEN</button>
+  <div id="replays" hidden>
+    <button id="replay-save" class="corner" type="button" tabindex="-1">REPLAY SPEICHERN</button>
+    <button id="replay-load" class="corner" type="button" tabindex="-1">REPLAY LADEN</button>
+    <button id="replay-speed" class="corner" type="button" tabindex="-1">TEMPO 1×</button>
+    <input id="replay-file" type="file" accept=".json,application/json" tabindex="-1" hidden>
+  </div>
   <pre id="pad" hidden></pre>
 
   <script type="module">
@@ -93,7 +111,42 @@
     const root = document.documentElement;
     // The world high score list (arcade-api on Cloudflare Workers). The test page goes without it: its test keys allow cheating.
     const scoreServer = undefined;
-    createPerseids(document.getElementById('game'), { fullscreenElement: root, scoreServer });
+    const perseids = createPerseids(document.getElementById('game'), { fullscreenElement: root, scoreServer });
+
+    // Replay files for bug reports: only the test page has them (the public build leaves them out).
+    if (perseids.replays) {
+      const replays = perseids.replays;
+      const $ = (id) => document.getElementById(id);
+      $('replays').hidden = false;
+      $('replay-save').addEventListener('click', (e) => {
+        e.currentTarget.blur();
+        const file = replays.save();
+        if (!file) return alert('Noch keine Partie gespielt.');
+        const url = URL.createObjectURL(new Blob([file.text], { type: 'application/json' }));
+        const link = Object.assign(document.createElement('a'), { href: url, download: file.name });
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+      $('replay-load').addEventListener('click', (e) => {
+        e.currentTarget.blur();
+        $('replay-file').click();
+      });
+      $('replay-file').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        try {
+          replays.play(await file.text());
+        } catch (err) {
+          alert('Replay lässt sich nicht abspielen: ' + err.message);
+        }
+      });
+      $('replay-speed').addEventListener('click', (e) => {
+        e.currentTarget.blur();
+        replays.speed = replays.speed === 1 ? 4 : 1;
+        e.currentTarget.textContent = 'TEMPO ' + replays.speed + '×';
+      });
+    }
 
     // Full screen without a keyboard (F also works): iPad and desktop browsers; iPhones have no full screen API.
     const full = document.getElementById('full');
