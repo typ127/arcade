@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0818">
+  <title>ORBIT</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #0a0818;
+    }
+    /* The hall fills the window; its canvas has exactly as many pixels as it covers. */
+    #hall {
+      position: fixed;
+      inset: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="hall"></div>
+  <script src="hall.js"></script>
+  <script>
+    // The world high score list (arcade-api on Cloudflare Workers), for the main hall's cabinet.
+    const scoreServer = 'https://arcade-scores.arcade-api.workers.dev';
+    Hall.startHall(document.getElementById('hall'), { scoreServer });
+  </script>
+</body>
+</html>
