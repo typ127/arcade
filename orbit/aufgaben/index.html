@@ -404,8 +404,9 @@
           '·',
           el('button', { class: 'link', type: 'button', onclick: () => { saved = {}; save(); location.reload(); } }, 'abmelden'),
         );
-        const fromHash = decodeURIComponent(location.hash.slice(1));
-        showView(PEOPLE.includes(fromHash) ? fromHash : who);
+        // Always start on one's own list; a tab chosen last time does not carry over.
+        if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+        showView(who);
         // Comments newer than this visit count as seen next time.
         saved.seen = Date.now();
         save();
@@ -447,8 +448,10 @@
 
       // ---------- tabs ----------
       function renderTabs() {
+        // One's own tab first, then the other person, then Sheldon.
+        const order = [saved.who, ...PEOPLE.filter((p) => p !== saved.who)].filter((p) => PEOPLE.includes(p));
         $('tabs').replaceChildren(
-          ...PEOPLE.map((who) => {
+          ...order.map((who) => {
             const asks = openFor(who).length;
             const waiting = who === 'Sheldon' ? 0 : tasksOf(who).filter((g) => g.ready !== false).flatMap((g) => g.items.filter((i) => i.id && !finished(status(i.id, who)))).length;
             return el('button', {
