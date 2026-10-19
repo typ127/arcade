@@ -108,8 +108,9 @@
     import { createPerseids } from './perseids.js';
 
     const root = document.documentElement;
-    // The world high score list (arcade-api on Cloudflare Workers). The test page goes without it: its test keys allow cheating.
+    // The world high score list (arcade-api on Cloudflare Workers). The test page goes without it: its test keys and cheats allow cheating.
     const scoreServer = 'https://arcade-scores.arcade-api.workers.dev';
+    // The CRT look is on until the player switches it in SETTINGS (Escape or Options open the menu); that choice is remembered.
     const perseids = createPerseids(document.getElementById('game'), { fullscreenElement: root, scoreServer });
 
     // Replay files for bug reports: only the test page has them (the public build leaves them out).
