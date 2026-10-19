@@ -288,6 +288,8 @@
         node.append(...children.flat().filter((c) => c !== null && c !== undefined && c !== false));
         return node;
       };
+      /** replaceChildren that skips empty parts, like el() does; replaceChildren itself would print them as 'null'. */
+      const fill = (node, ...children) => node.replaceChildren(...children.filter((c) => c !== null && c !== undefined && c !== false));
       const badge = (who) => el('span', { class: 'badge', 'data-who': who, 'aria-hidden': 'true' }, INITIALS[who] ?? '?');
 
       // ---------- remembered on this device ----------
@@ -558,7 +560,7 @@
             const o = status(item.id, w);
             return el('span', { 'data-who': w }, badge(w), o === 'ok' || o === 'done' ? '✓' : o === 'fail' ? '✗' : '–');
           });
-          card.replaceChildren(
+          fill(card,
             el('div', { class: 'card-main' },
               el('div', { class: 'checks' }, checks),
               el('div', { class: 'body' },
@@ -771,7 +773,7 @@
         card._render = () => {
           const part = openParts.get(c.id);
           const shown = c.parts.find((p) => p.title === part);
-          card.replaceChildren(
+          fill(card,
             el('div', { class: 'card-main' },
               el('div', { class: 'group-head' },
                 el('h3', {}, c.id),
