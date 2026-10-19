@@ -165,6 +165,14 @@
     .mention { color: var(--accent); font-weight: 600; }
     .comment .del { margin-left: 8px; font-size: 12px; }
     .compose { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .field { position: relative; }
+    .suggest {
+      position: absolute; left: 8px; top: calc(100% + 4px); z-index: 5; min-width: 180px; margin: 0; padding: 4px;
+      list-style: none; background: #141729; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px #000a;
+    }
+    .suggest li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; color: var(--who); cursor: pointer; }
+    .suggest li .badge { width: 18px; height: 18px; font-size: 7px; border-radius: 4px; }
+    .suggest li[aria-selected="true"], .suggest li:hover { background: #ffffff12; }
     .compose textarea {
       width: 100%; min-height: 72px; resize: vertical; color: var(--bright); background: #07081280;
       border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; line-height: 1.5;
@@ -577,10 +585,17 @@
         if (!openThreads.has(item)) return null;
         const box = el('textarea', {
           placeholder: hint || 'Kommentar, Fehlerbeschreibung oder Frage (@sheldon, @focusjunkie, @YoshiBro)',
-          'aria-label': 'Kommentar', oninput: (e) => drafts.set(item, e.target.value),
-          onkeydown: (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send(); },
+          'aria-label': 'Kommentar', 'aria-autocomplete': 'list',
+          oninput: (e) => { drafts.set(item, e.target.value); suggest.update(); },
+          onkeydown: (e) => {
+            if (suggest.key(e)) return;
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send();
+          },
+          onblur: () => suggest.close(),
+          onclick: () => suggest.update(),
         });
         box.value = drafts.get(item) || '';
+        const suggest = mentionMenu(box, (value) => drafts.set(item, value));
         const sendButton = el('button', { class: 'send', type: 'button', onclick: () => send() }, 'Senden');
         async function send() {
           const text = box.value.trim();
@@ -610,8 +625,62 @@
               el('p', {}, textWithMentions(c.text)),
             ),
           )),
-          el('div', { class: 'compose' }, box, el('div', { class: 'row' }, el('span', {}, 'Cmd/Strg + Enter sendet'), sendButton)),
+          el('div', { class: 'compose' }, el('div', { class: 'field' }, box, suggest.list), el('div', { class: 'row' }, el('span', {}, '@ für Namen · Cmd/Strg + Enter sendet'), sendButton)),
         );
+      }
+
+      /**
+       * Names to pick after '@' in a comment box: arrows and Enter or Tab choose, Escape closes.
+       * The word before the cursor counts when it starts with '@' at the start of the text or after a space.
+       */
+      function mentionMenu(box, onChange) {
+        const list = el('ul', { class: 'suggest', role: 'listbox', hidden: true });
+        let names = [];
+        let active = 0;
+        let start = -1;
+        const close = () => { list.hidden = true; names = []; };
+        function update() {
+          const before = box.value.slice(0, box.selectionStart);
+          const m = /(^|\s)@([a-z]*)$/i.exec(before);
+          if (!m || box.selectionStart !== box.selectionEnd) return close();
+          const typed = m[2].toLowerCase();
+          names = PEOPLE.filter((p) => p !== saved.who && p.toLowerCase().startsWith(typed));
+          if (!names.length) return close();
+          start = before.length - m[2].length - 1;
+          active = Math.min(active, names.length - 1);
+          list.replaceChildren(...names.map((name, i) => el('li', {
+            role: 'option', 'aria-selected': String(i === active), 'data-who': name,
+            onmousedown: (e) => { e.preventDefault(); pick(name); },
+          }, badge(name), name)));
+          list.hidden = false;
+        }
+        function pick(name) {
+          const end = box.selectionStart;
+          const after = box.value.slice(end);
+          const insert = `@${name}${after.startsWith(' ') ? '' : ' '}`;
+          box.value = box.value.slice(0, start) + insert + after;
+          const caret = start + insert.length + (after.startsWith(' ') ? 1 : 0);
+          box.setSelectionRange(caret, caret);
+          onChange(box.value);
+          close();
+          box.focus();
+        }
+        function key(e) {
+          if (list.hidden) return false;
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            active = (active + (e.key === 'ArrowDown' ? 1 : names.length - 1)) % names.length;
+            update();
+          } else if ((e.key === 'Enter' && !e.metaKey && !e.ctrlKey) || e.key === 'Tab') {
+            pick(names[active]);
+          } else if (e.key === 'Escape') {
+            close();
+          } else {
+            return false;
+          }
+          e.preventDefault();
+          return true;
+        }
+        return { list, update, key, close };
       }
 
       async function remove(c) {
