@@ -85,6 +85,8 @@
     .person .badge { width: 56px; height: 56px; font-size: 18px; }
     .person b { font: 12px var(--pixel); letter-spacing: 0.08em; color: var(--who); }
     .back { display: inline-block; margin-top: 32px; color: var(--muted); }
+    .home { display: inline-block; margin-bottom: 16px; color: var(--muted); font: 10px var(--pixel); letter-spacing: 0.1em; text-decoration: none; }
+    .home:hover, .home:focus-visible { color: var(--bright); }
 
     .badge {
       display: inline-grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 6px;
@@ -246,6 +248,7 @@
     </section>
 
     <section id="app" hidden>
+      <a class="home" href="../../">&larr; ARCADE</a>
       <header>
         <div>
           <h1>ORBIT AUFGABEN</h1>
