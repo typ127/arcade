@@ -38,19 +38,36 @@
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 16px;
     }
+    /* A card opens its game as a whole (the link in the title spans the card); its TEST MODE link sits on top. */
     .game {
-      display: block;
+      position: relative;
+      display: flex;
+      flex-direction: column;
       padding: 18px 20px;
       border: 1px solid var(--line);
       border-radius: 6px;
       background: #07081280;
-      color: inherit;
-      text-decoration: none;
       transition: border-color 0.15s, transform 0.15s;
     }
-    .game:hover, .game:focus-visible { border-color: #5a7dff; transform: translateY(-2px); outline: none; }
+    .game:hover, .game:focus-within { border-color: #5a7dff; transform: translateY(-2px); }
     .game h2 { margin: 0 0 6px; color: var(--bright); font-size: 18px; letter-spacing: 0.2em; }
+    .game h2 a { color: inherit; text-decoration: none; outline: none; }
+    .game h2 a::after { content: ""; position: absolute; inset: 0; border-radius: 6px; }
     .game p { margin: 0 0 12px; }
+    .actions { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: auto; }
+    .test {
+      position: relative;
+      z-index: 1;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--bright);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-decoration: none;
+      transition: border-color 0.15s;
+    }
+    .test:hover, .test:focus-visible { border-color: #5a7dff; outline: none; }
     .keys { color: var(--muted); font-size: 12px; }
     .play { color: var(--accent); }
     .more { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
@@ -68,7 +85,6 @@
     }
     .btn:hover, .btn:focus-visible { border-color: #5a7dff; outline: none; }
     .btn .play { margin-right: 6px; }
-    .note { margin: 10px 0 0; }
     footer { margin-top: 56px; color: var(--muted); font-size: 12px; }
     .legal { margin-top: 8px; font-size: 11px; }
     .legal a { color: var(--muted); }
@@ -80,20 +96,33 @@
     <h1>ARCADE</h1>
     <p class="lead">Original games in the spirit of the early-80s arcades. They run in the browser, with a keyboard or a gamepad.</p>
     <div class="games">
-      <a class="game" href="perseids/">
-        <h2>PERSEIDS</h2>
+      <article class="game">
+        <h2><a href="perseids/">PERSEIDS</a></h2>
         <p>A fixed shooter through ten worlds, each with its own monsters and boss, eight fighters to win, and perks and curses to catch or to dodge.</p>
-        <p class="keys">&larr; &rarr; move &middot; Space fire (hold for auto-fire) &middot; P pause &middot; M sound &middot; F full screen</p>
-        <p class="keys">Gamepad: stick or D-pad move &middot; R2 auto-fire &middot; R1 fire &middot; &#9633; start &middot; &#9675; pause &middot; &#9651; monsters &middot; &#10005; items &middot; R1 / L1 faction (title)</p>
-        <span class="play">&#9654; PLAY</span>
-      </a>
+        <p class="keys">&larr; &rarr; move &middot; Space fire (hold for auto-fire) &middot; P pause &middot; M sound &middot; Esc menu &middot; F full screen</p>
+        <p class="keys">Gamepad: stick or D-pad move &middot; R2 auto-fire &middot; R1 fire &middot; &#9633; start &middot; &#9675; pause &middot; &#9651; monsters &middot; &#10005; items &middot; R1 / L1 faction (title) &middot; Options menu</p>
+        <p class="keys">Test mode: Shift+N / V stage forward / back &middot; Shift+G / X / P item, curse and perk demos &middot; DEMOS and CHEATS in the menu &middot; gamepad L2 / L1. Games there stay off the world list.</p>
+        <div class="actions">
+          <span class="play" aria-hidden="true">&#9654; PLAY</span>
+          <a class="test" href="perseids/test/">TEST MODE</a>
+        </div>
+      </article>
+      <article class="game">
+        <h2><a href="orbit/halle/">ORBIT HALL</a></h2>
+        <p>A walkable arcade hall on a rainy night. Step in from the street, play PERSEIDS at its cabinet for the world list, or practise in the back room. Work in progress.</p>
+        <p class="keys">&larr; &rarr; walk &middot; &uarr; door &middot; Enter play &middot; Esc menu &middot; F full screen</p>
+        <p class="keys">Gamepad: stick or D-pad walk &middot; &#10005; door and play &middot; Options menu</p>
+        <p class="keys">Test mode: TEST in the menu fills the hall with test figures and dummy cabinets (FULL HALL). Its cabinet counts for the world list as usual.</p>
+        <div class="actions">
+          <span class="play" aria-hidden="true">&#9654; ENTER</span>
+          <a class="test" href="orbit/halle/test/">TEST MODE</a>
+        </div>
+      </article>
     </div>
     <nav class="more" aria-label="More">
       <a class="btn" href="orbit/1982/"><span class="play">&#9654;</span>ORBIT 1982 &middot; EXPERIMENT</a>
-      <a class="btn" href="perseids/test/"><span class="play">&#9654;</span>PERSEIDS TEST MODE</a>
       <a class="btn" href="orbit/konzept/"><span class="play">&#9654;</span>ORBIT CONCEPT &middot; PASSWORD</a>
     </nav>
-    <p class="keys note">Test mode: Shift+I infinite lives &middot; Shift+N next stage &middot; Shift+G / X / P item, curse and perk demos on the title screen &middot; gamepad L1 / L2. Games there stay off the world list.</p>
     <footer>
       All graphics, sounds and code are original. Your own high scores stay in your browser; the world list keeps three letters, the score, the stage and the ship.
       <div class="legal"><a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
