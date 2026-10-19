@@ -37,13 +37,13 @@
   <main>
     <a class="back" href="./">&larr; ARCADE</a>
     <h1>DATENSCHUTZ</h1>
-    <p class="muted">Stand: 16. Oktober 2026</p>
+    <p class="muted">Stand: 19. Oktober 2026</p>
 
     <h2>Verantwortlich</h2>
     <p>André Heßler<br>Waldstraße 21<br>90607 Rückersdorf<br>E-Mail: <a href="mailto:info@focusjunkie.de">info@focusjunkie.de</a></p>
 
     <h2>Kurz gesagt</h2>
-    <p>Keine Cookies, kein Tracking, keine Werbung, keine Analyse-Dienste. Die Seiten laden nichts von fremden Servern, außer der Weltbestenliste im Spiel PERSEIDS.</p>
+    <p>Keine Cookies, kein Tracking, keine Werbung, keine Analyse-Dienste. Die Seiten laden nichts von fremden Servern, außer der Weltbestenliste im Spiel PERSEIDS und der Aufgabenseite des Teams.</p>
 
     <h2>Hosting bei GitHub Pages</h2>
     <p>Die Website liegt bei GitHub Pages, einem Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. Beim Aufruf einer Seite übermittelt Ihr Browser technisch notwendige Daten an GitHub, vor allem Ihre IP-Adresse, Datum und Uhrzeit, die aufgerufene Adresse und die Browserkennung. GitHub speichert die IP-Adresse von Besuchern aus Sicherheitsgründen. Näheres steht im <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</p>
@@ -55,6 +55,10 @@
     <p>Damit nur wirklich gespielte Partien in die Liste kommen, schickt das Spiel mit dem Eintrag den Verlauf der Partie mit: welche Tasten in welchem Moment gedrückt waren. Der Server spielt die Partie damit nach und prüft die Punktzahl. Den Verlauf speichert er nicht.</p>
     <p>Damit niemand die Liste flutet, nimmt der Server von jedem Anschluss höchstens 5 Einträge in 10 Minuten an. Dafür speichert er eine Stunde lang einen Hash Ihrer IP-Adresse mit dem Zeitpunkt des Eintrags. Der Hash ist mit einem geheimen Wert gebildet, und aus ihm lässt sich die IP-Adresse nicht zurückrechnen. Die IP-Adresse selbst speichert der Server nicht.</p>
     <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse ist, eine gemeinsame Bestenliste anzubieten und sie vor Missbrauch zu schützen.</p>
+
+    <h2>Aufgabenseite des Teams</h2>
+    <p>Die Seite <code>/orbit/aufgaben/</code> ist nur für das Team von ORBIT und öffnet sich nur mit einem Passwort. Sie lädt Aufgaben, deren Stand und Kommentare vom selben Server bei Cloudflare wie die Weltbestenliste. Gespeichert werden der Stand jeder Aufgabe und die Kommentare, jeweils mit dem gewählten Namen und dem Zeitpunkt, bis sie gelöscht werden. Damit niemand das Passwort durchprobiert, speichert der Server bei einem falschen Passwort zehn Minuten lang einen Hash Ihrer IP-Adresse mit dem Zeitpunkt, gebildet wie beim Rate-Limit der Weltbestenliste.</p>
+    <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse ist, die gemeinsame Arbeit an ORBIT zu organisieren und die Seite vor fremdem Zugriff zu schützen.</p>
 
     <h2>Übermittlung in die USA</h2>
     <p>GitHub und Cloudflare sitzen in den USA. Beide sind nach dem EU-US Data Privacy Framework zertifiziert. Für zertifizierte Unternehmen hat die EU-Kommission ein angemessenes Datenschutzniveau festgestellt (Beschluss vom 10. Juli 2023, Art. 45 DSGVO).</p>
@@ -69,7 +73,8 @@
     </ul>
     <p>PERSEIDS läuft auch an den Automaten der ORBIT-Halle (<code>/orbit/halle/</code>) und nutzt dort dieselben Schlüssel. Die Halle selbst legt nichts im Browser ab.</p>
     <p>Die Seite ORBIT 1982 merkt sich dort die Zahl der Stempel auf ihrer Stempelkarte (<code>orbit-stempel</code>).</p>
-    <p>Diese Daten verlassen Ihren Browser nicht. Sie sind für die Funktionen nötig, die Sie im Spiel nutzen (§ 25 Abs. 2 Nr. 2 TDDDG). Löschen können Sie sie über die Browser-Einstellungen („Websitedaten löschen“).</p>
+    <p>Die Aufgabenseite merkt sich nach der Anmeldung einen aus dem Passwort abgeleiteten Schlüssel, den gewählten Namen, den Zeitpunkt des letzten Besuchs und ob erledigte Aufgaben ausgeblendet sind (<code>orbit.board</code>). Den Schlüssel schickt sie bei jeder Anfrage an den Server, um sich anzumelden.</p>
+    <p>Die übrigen Daten verlassen Ihren Browser nicht. Sie sind für die Funktionen nötig, die Sie im Spiel nutzen (§ 25 Abs. 2 Nr. 2 TDDDG). Löschen können Sie sie über die Browser-Einstellungen („Websitedaten löschen“).</p>
 
     <h2>Ihre Rechte</h2>
     <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen die Verarbeitung (Art. 21). Schreiben Sie dazu an die oben genannte E-Mail-Adresse. Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO).</p>
