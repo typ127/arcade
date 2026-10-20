@@ -33,6 +33,8 @@
       letter-spacing: 0.35em;
     }
     .lead { margin: 0 0 40px; color: var(--muted); }
+    header h1 + .lead { margin-bottom: 0; }
+    .games { margin-top: 40px; }
     .games {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -68,23 +70,64 @@
       transition: border-color 0.15s;
     }
     .test:hover, .test:focus-visible { border-color: #5a7dff; outline: none; }
-    .keys { color: var(--muted); font-size: 12px; }
     .play { color: var(--accent); }
-    .more { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
-    .btn {
-      display: inline-block;
-      padding: 9px 14px;
+    header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    /* The ORBIT menu: a burger button that opens a drawer from the right (a modal <dialog>). */
+    .burger {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
       border: 1px solid var(--line);
       border-radius: 6px;
       background: #07081280;
-      color: var(--bright);
-      font-size: 12px;
-      letter-spacing: 0.15em;
-      text-decoration: none;
+      cursor: pointer;
       transition: border-color 0.15s;
     }
-    .btn:hover, .btn:focus-visible { border-color: #5a7dff; outline: none; }
-    .btn .play { margin-right: 6px; }
+    .burger:hover, .burger:focus-visible { border-color: #5a7dff; outline: none; }
+    .burger i, .burger i::before, .burger i::after {
+      display: block; width: 16px; height: 2px; background: var(--bright); border-radius: 1px; content: "";
+    }
+    .burger i { position: relative; }
+    .burger i::before { position: absolute; top: -5px; }
+    .burger i::after { position: absolute; top: 5px; }
+    .drawer {
+      margin: 0 0 0 auto;
+      width: min(300px, 85vw);
+      max-width: none;
+      height: 100%;
+      max-height: none;
+      padding: 24px 16px;
+      box-sizing: border-box;
+      border: 0;
+      border-left: 1px solid var(--line);
+      background: #0a0c18;
+      color: var(--fg);
+      font: inherit;
+    }
+    .drawer[open] { animation: slide 0.18s ease-out; }
+    @keyframes slide { from { transform: translateX(100%); } }
+    .drawer::backdrop { background: #000a; }
+    .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .drawer-head b { color: var(--accent); font-size: 14px; letter-spacing: 0.3em; }
+    .close { padding: 4px 8px; border: 0; background: none; color: var(--muted); font: 20px/1 inherit; cursor: pointer; }
+    .close:hover, .close:focus-visible { color: var(--bright); outline: none; }
+    .drawer ul { margin: 0; padding: 0; list-style: none; }
+    .drawer a {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--bright);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+    }
+    .drawer a:hover, .drawer a:focus-visible { background: #ffffff0a; outline: none; }
+    .drawer a span { color: var(--muted); letter-spacing: 0; }
     footer { margin-top: 56px; color: var(--muted); font-size: 12px; }
     .legal { margin-top: 8px; font-size: 11px; }
     .legal a { color: var(--muted); }
@@ -93,15 +136,25 @@
 </head>
 <body>
   <main>
-    <h1>ARCADE</h1>
-    <p class="lead">Original games in the spirit of the early-80s arcades. They run in the browser, with a keyboard or a gamepad.</p>
+    <header>
+      <div>
+        <h1>ARCADE</h1>
+        <p class="lead">Original games in the spirit of the early-80s arcades.</p>
+      </div>
+      <button class="burger" type="button" aria-label="ORBIT menu" aria-haspopup="dialog" aria-controls="drawer"><i></i></button>
+    </header>
+    <dialog class="drawer" id="drawer" aria-label="ORBIT">
+      <div class="drawer-head"><b>ORBIT</b><button class="close" type="button" aria-label="Close">&times;</button></div>
+      <ul>
+        <li><a href="orbit/aufgaben/">ORBIT TEAM <span>&#128274;</span></a></li>
+        <li><a href="orbit/konzept/">ORBIT CONCEPT <span>&#128274;</span></a></li>
+        <li><a href="orbit/1982/">ORBIT 1982 <span>experiment</span></a></li>
+      </ul>
+    </dialog>
     <div class="games">
       <article class="game">
         <h2><a href="perseids/">PERSEIDS</a></h2>
-        <p>A fixed shooter through ten worlds, each with its own monsters and boss, eight fighters to win, and perks and curses to catch or to dodge.</p>
-        <p class="keys">&larr; &rarr; move &middot; Space fire (hold for auto-fire) &middot; P pause &middot; M sound &middot; Esc menu &middot; F full screen</p>
-        <p class="keys">Gamepad: stick or D-pad move &middot; R2 auto-fire &middot; R1 fire &middot; &#9633; start &middot; &#9675; pause &middot; &#9651; monsters &middot; &#10005; items &middot; R1 / L1 faction (title) &middot; Options menu</p>
-        <p class="keys">Test mode: Shift+N / V stage forward / back &middot; Shift+G / X / P item, curse and perk demos &middot; DEMOS and CHEATS in the menu &middot; gamepad L2 / L1. Games there stay off the world list.</p>
+        <p>A fixed shooter through ten worlds.</p>
         <div class="actions">
           <span class="play" aria-hidden="true">&#9654; PLAY</span>
           <a class="test" href="perseids/test/">TEST MODE</a>
@@ -109,25 +162,27 @@
       </article>
       <article class="game">
         <h2><a href="orbit/halle/">ORBIT HALL</a></h2>
-        <p>A walkable arcade hall on a rainy night. Step in from the street, play PERSEIDS at its cabinet for the world list, or practise in the back room. Work in progress.</p>
-        <p class="keys">&larr; &rarr; walk &middot; &uarr; door &middot; Enter play &middot; Esc menu &middot; F full screen</p>
-        <p class="keys">Gamepad: stick or D-pad walk &middot; &#10005; door and play &middot; Options menu</p>
-        <p class="keys">Test mode: TEST in the menu fills the hall with test figures and dummy cabinets (FULL HALL). Its cabinet counts for the world list as usual.</p>
+        <p>A walkable arcade hall. Work in progress.</p>
         <div class="actions">
           <span class="play" aria-hidden="true">&#9654; ENTER</span>
           <a class="test" href="orbit/halle/test/">TEST MODE</a>
         </div>
       </article>
     </div>
-    <nav class="more" aria-label="More">
-      <a class="btn" href="orbit/1982/"><span class="play">&#9654;</span>ORBIT 1982 &middot; EXPERIMENT</a>
-      <a class="btn" href="orbit/konzept/"><span class="play">&#9654;</span>ORBIT CONCEPT &middot; PASSWORD</a>
-      <a class="btn" href="orbit/aufgaben/"><span class="play">&#9654;</span>ORBIT TASKS &middot; PASSWORD</a>
-    </nav>
     <footer>
       All graphics, sounds and code are original. Your own high scores stay in your browser; the world list keeps three letters, the score, the stage and the ship.
       <div class="legal"><a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
     </footer>
   </main>
+  <script>
+    // The burger opens the drawer; Esc (built into <dialog>), the × and a click on the dark backdrop close it.
+    const drawer = document.getElementById('drawer');
+    document.querySelector('.burger').addEventListener('click', () => drawer.showModal());
+    drawer.querySelector('.close').addEventListener('click', () => drawer.close());
+    drawer.addEventListener('click', (e) => {
+      const r = drawer.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) drawer.close();
+    });
+  </script>
 </body>
 </html>
