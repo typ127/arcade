@@ -206,10 +206,23 @@
 
     .inbox { margin: 16px 0; padding: 12px 14px; border: 1px solid #5e5422; border-radius: 10px; background: #1a170880; }
     .inbox h3 { font-size: 14px; color: var(--accent); }
-    .inbox ul { margin: 8px 0 0; padding: 0; list-style: none; }
-    .inbox li { display: flex; gap: 8px; align-items: baseline; padding: 4px 0; }
-    .inbox li .badge { width: 18px; height: 18px; font-size: 7px; border-radius: 4px; }
-    .inbox .link { text-align: left; color: var(--fg); }
+    .inbox ul { margin: 6px 0 0; padding: 0; list-style: none; }
+    .inbox li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid #5e542266; }
+    .inbox li:first-child { border-top: 0; }
+    .inbox .ask { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 0; text-align: left; color: var(--fg); background: none; border: 0; }
+    .inbox .where { color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .inbox .said { display: flex; gap: 8px; align-items: flex-start; }
+    .inbox .said .badge { width: 18px; height: 18px; margin-top: 2px; font-size: 7px; border-radius: 4px; }
+    .inbox .quote { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.5; }
+    .inbox .said .at { flex: none; margin-left: auto; padding-left: 8px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+    .inbox .ask:hover .quote, .inbox .ask:focus-visible .quote { color: var(--bright); text-decoration: underline; }
+    .inbox .seen {
+      flex: none; padding: 3px 10px; border-radius: 6px; font-size: 12px; white-space: nowrap;
+      color: var(--muted); background: none; border: 1px solid var(--line);
+    }
+    .inbox .seen:hover, .inbox .seen:focus-visible { color: var(--ok); border-color: var(--ok); }
+    .inbox .seen:disabled { opacity: 0.5; cursor: wait; }
+    @media (max-width: 520px) { .inbox .said .at { display: none; } }
 
     /* ---------- changes ---------- */
     .change .card-main { flex-direction: column; gap: 6px; }
@@ -532,8 +545,10 @@
       const canonical = (name) => PEOPLE.find((p) => p.toLowerCase() === name.toLowerCase());
       const mentioned = (text) => [...new Set([...text.matchAll(mentionRe)].map((m) => canonical(m[1])))];
       const threadOf = (item) => comments.filter((c) => c.item === item);
-      /** Comments that mention someone with no later comment of theirs on the same item. */
-      const openFor = (person) => comments.filter((c) => c.author !== person && mentioned(c.text).includes(person) && !comments.some((d) => d.item === c.item && d.author === person && d.at > c.at));
+      /** Whether someone marked a comment as read without answering („✓ gelesen“); `read` lists them comma-separated. */
+      const readBy = (c, person) => (c.read ?? '').split(',').includes(person);
+      /** Comments that mention someone, not marked as read by them, with no later comment of theirs on the same item. */
+      const openFor = (person) => comments.filter((c) => c.author !== person && mentioned(c.text).includes(person) && !readBy(c, person) && !comments.some((d) => d.item === c.item && d.author === person && d.at > c.at));
       const when = (at) => new Date(at).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
       const tasksOf = (who) => catalog.groups.filter((g) => g.who.includes(who));
       const ticketOf = (item) => tickets.find((t) => `ticket:${t.id}` === item);
@@ -579,6 +594,7 @@
           }, title, n ? el('span', { class: 'count', title: `${n} warten auf dich` }, String(n)) : null);
         }));
         $('tabs').hidden = area !== 'tasks';
+        refreshInbox();
         // One's own tab first, then the other person, then Sheldon.
         const order = [saved.who, ...PEOPLE.filter((p) => p !== saved.who)].filter((p) => PEOPLE.includes(p));
         $('tabs').replaceChildren(
@@ -622,17 +638,48 @@
       }
 
       // ---------- inbox ----------
+      /** The place for a person's open questions at the top of a view; renderTabs keeps it current. */
       function inbox(person) {
+        return el('div', { class: 'inbox-slot', 'data-person': person }, inboxBox(person));
+      }
+      function refreshInbox() {
+        for (const slot of document.querySelectorAll('.inbox-slot')) fill(slot, inboxBox(slot.dataset.person));
+      }
+      /** Open questions grouped by place: the place small on top, below it each message; one „✓ gelesen“ per place. */
+      function inboxBox(person) {
         const asks = openFor(person);
         if (!asks.length) return null;
         const mine = person === saved.who;
+        const places = [...new Set(asks.map((c) => c.item))];
         return el('div', { class: 'inbox' },
           el('h3', {}, mine ? `Fragen an dich (${asks.length})` : `Offene Fragen an ${person} (${asks.length})`),
-          el('ul', {}, asks.map((c) => el('li', {},
-            badge(c.author),
-            el('button', { class: 'link', type: 'button', onclick: () => jump(c.item) }, `${itemLabel(c.item)}: „${c.text.split('\n')[0].slice(0, 90)}${c.text.length > 90 ? '…' : ''}“`),
-          ))),
+          el('ul', {}, places.map((item) => {
+            const here = asks.filter((c) => c.item === item);
+            return el('li', {},
+              el('button', { class: 'ask', type: 'button', onclick: () => jump(item) },
+                el('span', { class: 'where' }, itemLabel(item)),
+                here.map((c) => el('span', { class: 'said' }, badge(c.author), el('span', { class: 'quote' }, `„${preview(c.text, person)}“`), el('span', { class: 'at' }, when(c.at)))),
+              ),
+              mine ? el('button', { class: 'seen', type: 'button', title: 'Gelesen, ohne zu antworten', onclick: (e) => markRead(here, e.currentTarget) }, '✓ gelesen') : null,
+            );
+          })),
         );
+      }
+      /** A message on one line, without the mention of the reader it starts with. */
+      const preview = (text, person) => text.replace(new RegExp(`^\\s*@${person}\\b[\\s,:]*`, 'i'), '').replace(/\s+/g, ' ').trim();
+
+      async function markRead(asks, button) {
+        button.disabled = true;
+        try {
+          await api('/board/read', { ids: asks.map((c) => c.id), who: saved.who });
+          for (const c of asks) if (!readBy(c, saved.who)) c.read = c.read ? `${c.read},${saved.who}` : saved.who;
+          for (const item of new Set(asks.map((c) => c.item))) refreshItem(item);
+          if (area === 'tickets') renderTicketList();
+          renderTabs();
+        } catch (error) {
+          toast(`Nicht gespeichert: ${error.message}`);
+          button.disabled = false;
+        }
       }
 
       function jump(item) {
