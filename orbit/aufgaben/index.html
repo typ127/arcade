@@ -110,7 +110,7 @@
     }
     .area[aria-selected="true"] { color: #000; background: var(--accent); border-color: var(--accent); }
     .area .count { font: 600 12px var(--sans); letter-spacing: 0; }
-    nav.tabs { display: flex; gap: 6px; margin: 20px 0 8px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+    nav.tabs { display: flex; gap: 6px; margin: 20px 0 8px; border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: hidden; }
     .tab {
       display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin-bottom: -1px; white-space: nowrap;
       color: var(--muted); background: none; border: 1px solid transparent; border-radius: 8px 8px 0 0;
@@ -132,13 +132,14 @@
     .group.open { margin-bottom: 28px; }
     .group.later { opacity: 0.55; }
     .group-toggle {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; width: 100%; padding: 10px 14px; text-align: left;
+      display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 6px 10px; width: 100%; padding: 10px 14px; text-align: left;
       color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
     }
     .group-toggle:hover { border-color: #3a3f5c; }
     .group-toggle .group-title { font-size: 17px; font-weight: 600; color: var(--bright); }
     .group-toggle .caret { width: 12px; color: var(--muted); }
-    .group-toggle .done { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .group-toggle .label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+    .group-toggle .done { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
     .group-toggle .bar { width: 90px; }
     .count.ask { background: var(--accent); }
     .group-body { padding: 4px 0 0; }
@@ -289,6 +290,8 @@
     }
     @media (max-width: 520px) {
       main { padding-top: 24px; }
+      .group-toggle { grid-template-columns: 12px 1fr; }
+      .group-toggle .done { grid-column: 2; }
       h1 { font-size: 17px; }
       .card-main { padding: 10px 12px; gap: 10px; }
       .check { width: 34px; height: 34px; }
@@ -698,12 +701,14 @@
           toggle.setAttribute('aria-expanded', String(open));
           fill(toggle,
             el('span', { class: 'caret', 'aria-hidden': 'true' }, open ? '▾' : '▸'),
-            el('span', { class: 'group-title' }, g.title),
-            g.change ? el('span', { class: 'tag' }, g.change) : null,
-            later ? el('span', { class: 'tag wait' }, 'kommt noch') : null,
-            g.who.length > 1 ? el('span', { class: 'tag' }, `mit ${g.who.filter((w) => w !== who).join(', ')}`) : null,
-            asks ? el('span', { class: 'count ask', title: `${asks} offene Fragen an dich` }, String(asks)) : null,
-            fails ? el('span', { class: 'count', title: `${fails}× geht nicht` }, `${fails} ✗`) : null,
+            el('span', { class: 'label' },
+              el('span', { class: 'group-title' }, g.title),
+              g.change ? el('span', { class: 'tag' }, g.change) : null,
+              later ? el('span', { class: 'tag wait' }, 'kommt noch') : null,
+              g.who.length > 1 ? el('span', { class: 'tag' }, `mit ${g.who.filter((w) => w !== who).join(', ')}`) : null,
+              asks ? el('span', { class: 'count ask', title: `${asks} offene Fragen an dich` }, String(asks)) : null,
+              fails ? el('span', { class: 'count', title: `${fails}× geht nicht` }, `${fails} ✗`) : null,
+            ),
             el('span', { class: 'done' },
               el('span', { class: 'bar', 'aria-hidden': 'true' }, el('i', { style: `width:${items.length ? (100 * done) / items.length : 0}%` })),
               `${done} von ${items.length} erledigt`),
