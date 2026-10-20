@@ -128,8 +128,20 @@
     /* ---------- sections ---------- */
     h2 { margin: 40px 0 12px; font: 13px/1.5 var(--pixel); color: var(--bright); letter-spacing: 0.08em; }
     h3 { margin: 0; font-size: 17px; color: var(--bright); }
-    .group { margin: 16px 0 28px; }
+    .group { margin: 10px 0; }
+    .group.open { margin-bottom: 28px; }
     .group.later { opacity: 0.55; }
+    .group-toggle {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; width: 100%; padding: 10px 14px; text-align: left;
+      color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    }
+    .group-toggle:hover { border-color: #3a3f5c; }
+    .group-toggle .group-title { font-size: 17px; font-weight: 600; color: var(--bright); }
+    .group-toggle .caret { width: 12px; color: var(--muted); }
+    .group-toggle .done { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .group-toggle .bar { width: 90px; }
+    .count.ask { background: var(--accent); }
+    .group-body { padding: 4px 0 0; }
     .group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
     .tag { padding: 1px 8px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font: 12px var(--mono); }
     .tag.wait { border-color: #5d6275; }
@@ -390,6 +402,7 @@
       const lastSeen = Number(saved.seen || 0);
       const openThreads = new Set();
       const openParts = new Map(); // change id → part title
+      const openGroups = new Set(); // task groups unfolded during this visit; all start folded
       const drafts = new Map();
       const openTickets = new Set(); // ticket numbers shown with all details
       const bodies = new Map(); // ticket number → { at: updated_at, body, env } once loaded
@@ -629,7 +642,10 @@
           else refreshItem(item);
         } else {
           const owner = ownerOf(item);
-          if (area !== 'tasks' || view !== owner) showView(owner);
+          const group = catalog.groups.find((g) => g.items.some((i) => i.id === item));
+          const folded = group && !openGroups.has(group.id);
+          if (group) openGroups.add(group.id);
+          if (area !== 'tasks' || view !== owner || folded) showView(owner);
           else refreshItem(item);
         }
         const card = document.querySelector(`[data-item="${CSS.escape(item)}"]`);
@@ -655,8 +671,9 @@
         ));
         if (who !== saved.who) root.append(el('p', { class: 'intro' }, `Das ist die Liste von ${who}. Abhaken kann nur ${who}, kommentieren kann jeder.`));
         if (!groups.length) root.append(el('p', { class: 'empty' }, 'Gerade nichts zu tun.'));
-        for (const stage of catalog.stages) {
-          const inStage = groups.filter((g) => g.stage === stage.id);
+        // The newest first: the last stage on top, in it the group added last (docs/aufgaben.json appends new groups).
+        for (const stage of [...catalog.stages].reverse()) {
+          const inStage = groups.filter((g) => g.stage === stage.id).reverse();
           if (!inStage.length) continue;
           root.append(el('h2', {}, stage.title.toUpperCase()));
           for (const g of inStage) root.append(groupView(g, who));
@@ -664,25 +681,51 @@
         return root;
       }
 
+      /** A group of tasks, folded until clicked; its head always shows progress, questions to oneself and ✗. */
       function groupView(g, who) {
         const later = g.ready === false;
-        const node = el('section', { class: `group${later ? ' later' : ''}` },
-          el('div', { class: 'group-head' },
-            el('h3', {}, g.title),
+        const node = el('section', { class: `group${later ? ' later' : ''}`, 'data-group': g.id });
+        const toggle = el('button', {
+          class: 'group-toggle', type: 'button',
+          onclick: () => { openGroups.has(g.id) ? openGroups.delete(g.id) : openGroups.add(g.id); node._render(); },
+        });
+        node._renderHead = () => {
+          const items = g.items.filter((i) => i.id);
+          const done = items.filter((i) => finished(status(i.id, who))).length;
+          const fails = items.filter((i) => status(i.id, who) === 'fail').length;
+          const asks = openFor(saved.who).filter((c) => items.some((i) => i.id === c.item)).length;
+          const open = openGroups.has(g.id);
+          toggle.setAttribute('aria-expanded', String(open));
+          fill(toggle,
+            el('span', { class: 'caret', 'aria-hidden': 'true' }, open ? '▾' : '▸'),
+            el('span', { class: 'group-title' }, g.title),
             g.change ? el('span', { class: 'tag' }, g.change) : null,
             later ? el('span', { class: 'tag wait' }, 'kommt noch') : null,
             g.who.length > 1 ? el('span', { class: 'tag' }, `mit ${g.who.filter((w) => w !== who).join(', ')}`) : null,
-          ),
-          g.intro ? el('p', { class: 'intro', html: g.intro }) : null,
-        );
-        let shown = 0;
-        for (const item of g.items) {
-          if (item.heading) { node.append(el('div', { class: 'subhead' }, item.heading)); continue; }
-          if (hideDone && finished(status(item.id, who))) continue;
-          node.append(taskCard(g, item, who, later));
-          shown++;
-        }
-        if (!shown) node.append(el('p', { class: 'empty' }, 'Alles erledigt.'));
+            asks ? el('span', { class: 'count ask', title: `${asks} offene Fragen an dich` }, String(asks)) : null,
+            fails ? el('span', { class: 'count', title: `${fails}× geht nicht` }, `${fails} ✗`) : null,
+            el('span', { class: 'done' },
+              el('span', { class: 'bar', 'aria-hidden': 'true' }, el('i', { style: `width:${items.length ? (100 * done) / items.length : 0}%` })),
+              `${done} von ${items.length} erledigt`),
+          );
+        };
+        node._render = () => {
+          node._renderHead();
+          const open = openGroups.has(g.id);
+          node.classList.toggle('open', open);
+          if (!open) return fill(node, toggle);
+          const body = el('div', { class: 'group-body' }, g.intro ? el('p', { class: 'intro', html: g.intro }) : null);
+          let shown = 0;
+          for (const item of g.items) {
+            if (item.heading) { body.append(el('div', { class: 'subhead' }, item.heading)); continue; }
+            if (hideDone && finished(status(item.id, who))) continue;
+            body.append(taskCard(g, item, who, later));
+            shown++;
+          }
+          if (!shown) body.append(el('p', { class: 'empty' }, 'Alles erledigt.'));
+          fill(node, toggle, body);
+        };
+        node._render();
         return node;
       }
 
@@ -878,6 +921,7 @@
 
       function updateProgress() {
         if (view === 'Sheldon' || !view) return;
+        for (const group of document.querySelectorAll('.group')) group._renderHead?.();
         const ready = tasksOf(view).filter((g) => g.ready !== false).flatMap((g) => g.items.filter((i) => i.id));
         const doneCount = ready.filter((i) => finished(status(i.id, view))).length;
         const bar = document.querySelector('.progress');
@@ -890,9 +934,9 @@
         const archived = changes.filter((c) => c.archived);
         const root = el('div', {}, inbox('Sheldon'));
         root.append(el('p', { class: 'intro' }, 'Sheldon schreibt den Code. Hier stehen die geplanten Changes zum gemeinsamen Durchlesen: Vorschlag, Design, Specs und Aufgaben. Fragen und Anmerkungen als Kommentar an @sheldon.'));
-        for (const stage of catalog.stages) {
-          // In the order of the plan (docs/aufgaben.json), not of the folders.
-          const inStage = active.filter((c) => stage.changes.includes(c.id)).sort((a, b) => stage.changes.indexOf(a.id) - stage.changes.indexOf(b.id));
+        for (const stage of [...catalog.stages].reverse()) {
+          // The newest first: the last stage on top, in it the change planned last (order of docs/aufgaben.json).
+          const inStage = active.filter((c) => stage.changes.includes(c.id)).sort((a, b) => stage.changes.indexOf(b.id) - stage.changes.indexOf(a.id));
           if (!inStage.length) continue;
           root.append(el('h2', {}, stage.title.toUpperCase()));
           for (const c of inStage) root.append(changeCard(c));
