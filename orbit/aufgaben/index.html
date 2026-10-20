@@ -2035,6 +2035,7 @@
                 el('div', { class: 'row picture-actions' },
                   c && !c.dataset.error ? el('button', { class: 'send', type: 'button', title: 'In Originalgröße mit Transparenz speichern', onclick: () => downloadPng(it, c) }, 'PNG') : null,
                   c && !c.dataset.error ? copyButton(() => canvasPng(c)) : null,
+                  pictureFiles(it.id, 'upload').length < MAX_UPLOADS ? pasteButton(it) : null,
                   uploadButton(it, current),
                   el('button', { class: 'link', type: 'button', onclick: () => { picture = null; history.replaceState(null, '', '#galerie'); renderGalleryTree(); } }, 'schließen'),
                 ),
@@ -2281,6 +2282,75 @@
         return button;
       }
 
+      // ---------- pasting ----------
+      const canPaste = () => !!navigator.clipboard?.read;
+      const extension = (type) => (type === 'image/png' ? 'png' : type.split('/')[1]);
+      /** The first picture in the clipboard as a file `name`.png (browsers give pictures as PNG), or null. Must start in a tap. */
+      async function clipboardPicture(name) {
+        for (const item of await navigator.clipboard.read()) {
+          const type = item.types.find((t) => t === 'image/png') ?? item.types.find((t) => t.startsWith('image/'));
+          if (type) return new File([await item.getType(type)], `${name}.${extension(type)}`, { type });
+        }
+        return null;
+      }
+      const pasteFailed = (error) => toast(`Nicht eingefügt: ${error.name === 'NotAllowedError' ? 'der Browser hat die Zwischenablage nicht freigegeben' : error.message}`);
+      /** The name of a pasted picture: in the conversation of a catalog picture after its id, in the collection decided by pasteOwn. */
+      const pasteName = (it) => (it.own ? 'Eingefügt' : `eingefügt-${it.id}`);
+      /** The next free name in a folder: the name itself, else with the next number („Fahrrad 2“). */
+      function freeName(folder, name) {
+        const taken = (n) => ownPictures.some((p) => p.folder === folder && p.name === n);
+        if (!taken(name)) return name;
+        const stem = name.replace(/ [0-9]+$/, '').slice(0, 55);
+        for (let n = 2; ; n++) if (!taken(`${stem} ${n}`)) return `${stem} ${n}`;
+      }
+
+      /**
+       * A pasted picture goes where an upload would: into the conversation of a catalog picture, beside
+       * its current version, or as a new picture into the folder of a picture of the collection.
+       */
+      async function pastePicture(it, file) {
+        if (!file) return toast('In der Zwischenablage liegt kein Bild.');
+        if (!it.own) return uploadPainted(it, currentVersion(it.id), file);
+        const p = ownPicture(it.id) ?? it.own;
+        return pasteOwn(p.folder, file, p.name);
+      }
+      async function pasteOwn(folder, file, name) {
+        const [made] = await uploadOwn(folder, [new File([file], `${freeName(folder, name)}.${extension(file.type)}`, { type: file.type })]);
+        if (made) openPicture(`own.${made.id}`);
+      }
+      async function pasteHere(folder) {
+        try {
+          const file = await clipboardPicture('Eingefügt');
+          if (!file) return toast('In der Zwischenablage liegt kein Bild.');
+          await pasteOwn(folder, file, 'Eingefügt');
+        } catch (error) {
+          pasteFailed(error);
+        }
+      }
+      /** „Einfügen“ in the large view; Safari first shows its own „Einfügen“ bubble. */
+      function pasteButton(it) {
+        if (!canPaste() || it.removed) return null;
+        return el('button', {
+          class: 'send', type: 'button', title: 'Ein Bild aus der Zwischenablage anhängen, etwa aus Pixaki (am Mac auch Cmd+V)',
+          onclick: async () => {
+            try {
+              await pastePicture(it, await clipboardPicture(pasteName(it)));
+            } catch (error) {
+              pasteFailed(error);
+            }
+          },
+        }, 'Einfügen');
+      }
+      // Cmd+V while a picture is open and no text field has the focus pastes into it, without asking.
+      document.addEventListener('paste', (e) => {
+        if (area !== 'gallery' || !picture || e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+        const it = galleryEntry(picture);
+        if (!it || it.removed) return;
+        e.preventDefault();
+        const file = [...(e.clipboardData?.files ?? [])].find((f) => f.type.startsWith('image/'));
+        pastePicture(it, file && new File([file], `${pasteName(it)}.${extension(file.type)}`, { type: file.type })).catch(pasteFailed);
+      });
+
       // ---------- the collection ----------
       /** All folders of the collection with their parents, sorted ('Möbel', 'Möbel/Fahrzeuge'). */
       function ownFolders() {
@@ -2310,13 +2380,14 @@
         return path.join('/');
       }
 
-      /** In an open folder of the collection: upload right into it, rename it; a hint while the collection is empty. */
+      /** In an open folder of the collection: upload or paste right into it, rename it; a hint while the collection is empty. */
       function collectionActions(node) {
         const folder = folderOf(node);
         const input = el('input', { type: 'file', multiple: true, accept: GALLERY_ACCEPT, hidden: true, onchange: (e) => { uploadOwn(folder, [...e.target.files]); e.target.value = ''; } });
         return el('div', { class: 'collection-actions' },
           !ownPictures.length ? el('span', { class: 'hint' }, 'Noch leer. Hier sammelt ihr eigene Bilder für später, in Ordnern, die ihr beim Hochladen anlegt.') : null,
           el('button', { class: 'link', type: 'button', onclick: () => input.click() }, folder ? 'hierhin hochladen' : 'Bilder hochladen'), input,
+          canPaste() ? el('button', { class: 'link', type: 'button', onclick: () => pasteHere(folder) }, 'hierhin einfügen') : null,
           folder ? el('button', { class: 'link', type: 'button', onclick: () => renameFolder(folder) }, 'Ordner umbenennen') : null,
         );
       }
@@ -2377,9 +2448,9 @@
         );
       }
 
-      /** Uploads pictures one by one into a folder of the collection, then shows the folder. */
+      /** Uploads pictures one by one into a folder of the collection, then shows the folder; returns the new pictures. */
       async function uploadOwn(folder, list, progress) {
-        let n = 0;
+        const made = [];
         for (const file of list) {
           if (ownPictures.length >= MAX_OWN) { toast(`Höchstens ${MAX_OWN} Bilder in der Sammlung.`); break; }
           const problem = await imageProblem(file);
@@ -2393,7 +2464,8 @@
             if (!res.ok) throw new Error(res.status === 413 ? 'größer als 1 MB' : res.status === 415 ? 'kein Bild (PNG, GIF, WebP, JPEG)' : data.error || `HTTP ${res.status}`);
             ownPictures.push(data.picture);
             files.push(data.file);
-            progress?.(++n);
+            made.push(data.picture);
+            progress?.(made.length);
           } catch (error) {
             toast(`„${file.name}“ nicht hochgeladen: ${error.message}`);
           }
@@ -2402,7 +2474,7 @@
         renderGalleryTree();
         renderTabs();
         document.querySelector(`[data-folder="${CSS.escape(key)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return n;
+        return made;
       }
 
       async function renameFolder(from) {
@@ -2456,6 +2528,7 @@
                 editing ? ownEditForm(it, p, editing) : el('div', { class: 'row picture-actions' },
                   url ? el('a', { class: 'send', href: url, download: f.name, title: 'Die hochgeladene Datei' }, 'Herunterladen') : null,
                   c ? copyButton(() => (f.mime === 'image/png' ? fetch(url).then((r) => r.arrayBuffer()).then((b) => new Blob([b], { type: 'image/png' })) : canvasPng(c))) : null,
+                  pasteButton(it),
                   el('button', { class: 'link', type: 'button', onclick: () => { ownEdits.set(it.id, { name: p.name, folder: p.folder }); refreshItem(item); } }, 'umbenennen / verschieben'),
                   mayDelete ? el('button', { class: 'link', type: 'button', onclick: () => deleteOwn(p) }, 'löschen') : null,
                   el('button', { class: 'link', type: 'button', onclick: () => { picture = null; history.replaceState(null, '', '#galerie'); renderGalleryTree(); } }, 'schließen'),
