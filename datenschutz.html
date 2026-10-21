@@ -37,13 +37,13 @@
   <main>
     <a class="back" href="./">&larr; ARCADE</a>
     <h1>DATENSCHUTZ</h1>
-    <p class="muted">Stand: 20. Oktober 2026</p>
+    <p class="muted">Stand: 21. Oktober 2026</p>
 
     <h2>Verantwortlich</h2>
     <p>André Heßler<br>Waldstraße 21<br>90607 Rückersdorf<br>E-Mail: <a href="mailto:info@focusjunkie.de">info@focusjunkie.de</a></p>
 
     <h2>Kurz gesagt</h2>
-    <p>Keine Cookies, kein Tracking, keine Werbung, keine Analyse-Dienste. Die Seiten laden nichts von fremden Servern, außer der Weltbestenliste im Spiel PERSEIDS und der Aufgabenseite des Teams.</p>
+    <p>Keine Cookies, kein Tracking, keine Werbung, keine Analyse-Dienste. Die Seiten laden nichts von fremden Servern, außer der Weltbestenliste im Spiel PERSEIDS, der Aufgabenseite des Teams und, nur mit Einladung, dem Hallenserver der ORBIT-Halle.</p>
 
     <h2>Hosting bei GitHub Pages</h2>
     <p>Die Website liegt bei GitHub Pages, einem Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. Beim Aufruf einer Seite übermittelt Ihr Browser technisch notwendige Daten an GitHub, vor allem Ihre IP-Adresse, Datum und Uhrzeit, die aufgerufene Adresse und die Browserkennung. GitHub speichert die IP-Adresse von Besuchern aus Sicherheitsgründen. Näheres steht im <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</p>
@@ -60,6 +60,10 @@
     <p>Die Seite <code>/orbit/aufgaben/</code> ist nur für das Team von ORBIT und öffnet sich nur mit einem Passwort. Sie lädt Aufgaben, deren Stand, Tickets, Kommentare und die Galerie der Grafiken vom selben Server bei Cloudflare wie die Weltbestenliste. Gespeichert werden der Stand jeder Aufgabe, die Kommentare und die Tickets mit ihrem Inhalt (Typ, Bereich, Titel, Beschreibung) und ihrem Verlauf, jeweils mit dem gewählten Namen und den Zeitpunkten, bis sie gelöscht werden. Zu jedem Ticket, das auf der Seite angelegt wird, speichert sie eine Geräteangabe: eine Kurzform von Gerät und Browser (etwa „Safari 18 · iPadOS“) und die Fenstergröße, nicht die vollständige Kennung des Browsers. Angehängte Dateien (Bilder und Replays aus PERSEIDS) liegen ebenfalls auf diesem Server, bis sie gelöscht werden. In der Galerie speichert er zu jeder Grafik die Kommentare, hochgeladene Bilder und die Aufträge an Sheldon mit ihrem Verlauf, dazu die Stände der Grafik: Bilder, die die Seite beim Ansehen zeichnet und hochlädt. In der Sammlung der Galerie liegen Bilder, die das Team für später hochlädt, mit Name, Ordner, Kommentaren und Aufträgen. Auch hier jeweils mit dem gewählten Namen und den Zeitpunkten, bis sie gelöscht werden. Damit niemand das Passwort durchprobiert, speichert der Server bei einem falschen Passwort zehn Minuten lang einen Hash Ihrer IP-Adresse mit dem Zeitpunkt, gebildet wie beim Rate-Limit der Weltbestenliste.</p>
     <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse ist, die gemeinsame Arbeit an ORBIT zu organisieren und die Seite vor fremdem Zugriff zu schützen.</p>
 
+    <h2>ORBIT-Halle mit Einladung</h2>
+    <p>Die ORBIT-Halle (<code>/orbit/halle/</code>) läuft ohne Server, außer Sie sind mit einem Einladungslink gekommen. Einladungen gibt es vorerst nur für eine geschlossene Testgruppe. Mit Einladung verbindet sich die Halle mit dem Hallenserver beim selben Anbieter wie die Weltbestenliste (Cloudflare Durable Objects, <code>arcade-scores.arcade-api.workers.dev</code>), der in der EU läuft. Sie schickt ihm den Einladungscode, Ihr Kürzel und das Aussehen Ihres Avatars, den Raum, in dem er steht, seine Stelle und Blickrichtung, ob er läuft und an welchem Automaten er spielt, und die Nummern der festen Sprechblasen, die Sie wählen (Freitext gibt es nicht). Der Server reicht das an die anderen eingeladenen Gäste im selben Raum weiter, solange Sie verbunden sind. Er speichert und protokolliert davon nichts; ist die Verbindung zu, ist es auch beim Server weg. IP-Adressen speichert er nicht. Dauerhaft gespeichert ist nur die Liste der Einladungscodes, jeder mit einer Notiz, für wen er ist; die Notiz sieht niemand in der Halle. Cloudflare erhält beim Verbindungsaufbau wie bei der Weltbestenliste Ihre IP-Adresse und technische Daten der Anfrage.</p>
+    <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse ist, eingeladenen Gästen eine gemeinsame Halle anzubieten.</p>
+
     <h2>Übermittlung in die USA</h2>
     <p>GitHub und Cloudflare sitzen in den USA. Beide sind nach dem EU-US Data Privacy Framework zertifiziert. Für zertifizierte Unternehmen hat die EU-Kommission ein angemessenes Datenschutzniveau festgestellt (Beschluss vom 10. Juli 2023, Art. 45 DSGVO).</p>
 
@@ -72,7 +76,8 @@
       <li>ob der CRT-Bildschirmeffekt aus ist (<code>perseids.crt</code>)</li>
     </ul>
     <p>PERSEIDS läuft auch an den Automaten der ORBIT-Halle (<code>/orbit/halle/</code>) und nutzt dort dieselben Schlüssel.</p>
-    <p>Die ORBIT-Halle merkt sich das Kürzel aus drei Zeichen und das Aussehen Ihres Avatars, das Sie in der Garderobe wählen (<code>orbit.identity</code>). Es bleibt in Ihrem Browser und wird in dieser Fassung der Halle nirgendwohin geschickt. Nur wenn eine Partie an einem Automaten der Halle für die Weltbestenliste reicht und Sie den Namen dort bestätigen, geht er wie jeder Name in PERSEIDS an die Weltbestenliste.</p>
+    <p>Die ORBIT-Halle merkt sich das Kürzel aus drei Zeichen und das Aussehen Ihres Avatars, das Sie in der Garderobe wählen (<code>orbit.identity</code>). Ohne Einladung bleibt es in Ihrem Browser; mit Einladung geht es an den Hallenserver (siehe „ORBIT-Halle mit Einladung“). Wenn eine Partie an einem Automaten der Halle für die Weltbestenliste reicht und Sie den Namen dort bestätigen, geht er wie jeder Name in PERSEIDS an die Weltbestenliste.</p>
+    <p>Wer mit einem Einladungslink kommt, dessen Halle merkt sich den Einladungscode (<code>orbit.invite</code>), damit spätere Besuche ohne den Link gehen. Den Code schickt sie bei jeder Verbindung an den Hallenserver. Lehnt der Server ihn ab, löscht die Halle ihn.</p>
     <p>Die Seite ORBIT 1982 merkt sich dort die Zahl der Stempel auf ihrer Stempelkarte (<code>orbit-stempel</code>).</p>
     <p>Die Aufgabenseite merkt sich nach der Anmeldung einen aus dem Passwort abgeleiteten Schlüssel, den gewählten Namen, den Zeitpunkt des letzten Besuchs und ob erledigte Aufgaben ausgeblendet sind (<code>orbit.board</code>). Den Schlüssel schickt sie bei jeder Anfrage an den Server, um sich anzumelden.</p>
     <p>Die übrigen Daten verlassen Ihren Browser nicht. Sie sind für die Funktionen nötig, die Sie im Spiel nutzen (§ 25 Abs. 2 Nr. 2 TDDDG). Löschen können Sie sie über die Browser-Einstellungen („Websitedaten löschen“).</p>
