@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="arcade-lock" content="v1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#000000">
+  <title>Prototypes</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --fg: #9aa0b4;
+      --bright: #e4e6f0;
+      --muted: #5d6275;
+      --accent: #ffe14a;
+      --line: #23263a;
+      --bad: #ff6a5c;
+    }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(ellipse at top, #0b0d1c 0%, #000 70%) #000;
+      color: var(--fg);
+      font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    main { max-width: 440px; margin: 0 auto; padding: 96px 16px 64px; }
+    main[hidden] { display: none; }
+    h1 { margin: 0 0 4px; color: var(--accent); font-size: 28px; letter-spacing: 0.35em; overflow-wrap: anywhere; }
+    p { margin: 0 0 24px; color: var(--muted); }
+    form { display: flex; flex-wrap: wrap; gap: 8px; }
+    label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    input {
+      flex: 1 1 200px; min-width: 0; font: inherit; color: var(--bright);
+      background: #07081280; border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px;
+    }
+    input:focus-visible { outline: none; border-color: #5a7dff; }
+    button {
+      font: inherit; color: #000; background: var(--accent); border: 0; border-radius: 6px;
+      padding: 10px 16px; letter-spacing: 0.15em; cursor: pointer;
+    }
+    button:focus-visible { outline: 2px solid var(--bright); outline-offset: 2px; }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .msg { min-height: 1.6em; margin: 12px 0 32px; color: var(--bad); }
+    a { color: var(--muted); }
+    a:hover, a:focus-visible { color: var(--fg); }
+  </style>
+</head>
+<body>
+  <main id="lock" hidden>
+    <h1>PROTOTYPES</h1>
+    <p>HOPROD, PERSEIDS und die ORBIT-Halle, alle im Aufbau. Die Seite ist verschlüsselt und öffnet sich nur mit dem Passwort. Einmal eingegeben, merkt sich dieser Browser die Freischaltung.</p>
+    <form id="unlock">
+      <label for="pw">Passwort</label>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Passwort" required>
+      <button id="go" type="submit">ÖFFNEN</button>
+    </form>
+    <p class="msg" id="msg" role="alert"></p>
+    <a href="/">&larr; ARCADE</a>
+  </main>
+  <script>
+    (async () => {
+      const D = {"salt":"arcade-lock-v1","iter":600000,"iv":"j81XtyOiqoZk9ik/","data":"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"};
+      const STORE = "arcade.unlock";
+      async function deriveMaster(password, salt, iterations) {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations, hash: 'SHA-256' }, base, 256);
+  return new Uint8Array(bits);
+}
+      async function subkey(master, purpose, algorithm, usages) {
+  const base = await crypto.subtle.importKey('raw', master, 'HKDF', false, ['deriveKey']);
+  const params = { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info: new TextEncoder().encode(purpose) };
+  return crypto.subtle.deriveKey(params, base, algorithm, false, usages);
+}
+      async function openPayload(master, payload) {
+  const bytes = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const key = await subkey(master, 'arcade-lock-v1 enc', { name: 'AES-GCM', length: 256 }, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes(payload.iv) }, key, bytes(payload.data));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+      const b64 = (bytes) => btoa(String.fromCharCode(...bytes));
+      const bytes = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+      const forget = () => { try { localStorage.removeItem(STORE); } catch {} };
+      // Every script gets a blob URL in place of its address; then the page replaces this one.
+      const show = ({ page, files }) => {
+        for (const [name, text] of Object.entries(files)) {
+          const url = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+          page = page.split('@arcade-lock:' + name + '@').join(url);
+        }
+        document.open();
+        document.write(page);
+        document.close();
+      };
+      const lock = document.getElementById('lock');
+      const form = document.getElementById('unlock');
+      const pw = document.getElementById('pw');
+      const go = document.getElementById('go');
+      const msg = document.getElementById('msg');
+      const ask = (text) => {
+        lock.hidden = false;
+        msg.textContent = text;
+        pw.focus();
+      };
+      if (!window.crypto || !crypto.subtle) return ask('Dieser Browser kann die Seite nicht entschlüsseln.');
+
+      // Unlocked before in this browser: open without asking.
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch {}
+      if (saved && saved.salt === D.salt && saved.iter === D.iter && typeof saved.key === 'string') {
+        let content = null;
+        try { content = await openPayload(bytes(saved.key), D); } catch { forget(); }
+        if (content) return show(content);
+      }
+      ask('');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        go.disabled = true;
+        msg.textContent = '';
+        let master, content;
+        try {
+          master = await deriveMaster(pw.value, D.salt, D.iter);
+          content = await openPayload(master, D);
+        } catch {
+          msg.textContent = 'Falsches Passwort.';
+          go.disabled = false;
+          pw.select();
+          return;
+        }
+        try { localStorage.setItem(STORE, JSON.stringify({ salt: D.salt, iter: D.iter, key: b64(master) })); } catch {}
+        show(content);
+      });
+    })();
+  </script>
+</body>
+</html>
