@@ -32,45 +32,8 @@
       font-size: 28px;
       letter-spacing: 0.35em;
     }
-    .lead { margin: 0 0 40px; color: var(--muted); }
-    header h1 + .lead { margin-bottom: 0; }
-    .games { margin-top: 40px; }
-    .games {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-    }
-    /* A card opens its game as a whole (the link in the title spans the card); its TEST MODE link sits on top. */
-    .game {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      padding: 18px 20px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #07081280;
-      transition: border-color 0.15s, transform 0.15s;
-    }
-    .game:hover, .game:focus-within { border-color: #5a7dff; transform: translateY(-2px); }
-    .game h2 { margin: 0 0 6px; color: var(--bright); font-size: 18px; letter-spacing: 0.2em; }
-    .game h2 a { color: inherit; text-decoration: none; outline: none; }
-    .game h2 a::after { content: ""; position: absolute; inset: 0; border-radius: 6px; }
-    .game p { margin: 0 0 12px; }
-    .actions { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: auto; }
-    .test {
-      position: relative;
-      z-index: 1;
-      padding: 2px 8px;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      color: var(--bright);
-      font-size: 12px;
-      letter-spacing: 0.15em;
-      text-decoration: none;
-      transition: border-color 0.15s;
-    }
-    .test:hover, .test:focus-visible { border-color: #5a7dff; outline: none; }
-    .play { color: var(--accent); }
+    .lead { margin: 0; color: var(--muted); }
+    .soon { margin: 40px 0 0; color: var(--bright); letter-spacing: 0.35em; }
     header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
     /* The ORBIT menu: a burger button that opens a drawer from the right (a modal <dialog>). */
     .burger {
@@ -129,7 +92,7 @@
     .drawer a:hover, .drawer a:focus-visible { background: #ffffff0a; outline: none; }
     .drawer a span { color: var(--muted); letter-spacing: 0; }
     footer { margin-top: 56px; color: var(--muted); font-size: 12px; }
-    .legal { margin-top: 8px; font-size: 11px; }
+    .legal { font-size: 11px; }
     .legal a { color: var(--muted); }
     .legal a:hover, .legal a:focus-visible { color: var(--fg); }
   </style>
@@ -146,32 +109,15 @@
     <dialog class="drawer" id="drawer" aria-label="ORBIT">
       <div class="drawer-head"><b>ORBIT</b><button class="close" type="button" aria-label="Close">&times;</button></div>
       <ul>
+        <li><a href="prototypes/">PROTOTYPES <span>&#128274;</span></a></li>
         <li><a href="orbit/aufgaben/">ORBIT TEAM <span>&#128274;</span></a></li>
         <li><a href="orbit/konzept/">ORBIT CONCEPT <span>&#128274;</span></a></li>
         <li><a href="orbit/design/">ORBIT DESIGN <span>&#128274;</span></a></li>
         <li><a href="orbit/1982/">ORBIT 1982 <span>experiment</span></a></li>
       </ul>
     </dialog>
-    <div class="games">
-      <article class="game">
-        <h2><a href="perseids/">PERSEIDS</a></h2>
-        <p>A fixed shooter through ten worlds.</p>
-        <div class="actions">
-          <span class="play" aria-hidden="true">&#9654; PLAY</span>
-          <a class="test" href="perseids/test/">TEST MODE</a>
-        </div>
-      </article>
-      <article class="game">
-        <h2><a href="orbit/halle/">ORBIT HALL</a></h2>
-        <p>A walkable arcade hall. Work in progress.</p>
-        <div class="actions">
-          <span class="play" aria-hidden="true">&#9654; ENTER</span>
-          <a class="test" href="orbit/halle/test/">TEST MODE</a>
-        </div>
-      </article>
-    </div>
+    <p class="soon">COMING SOON</p>
     <footer>
-      All graphics, sounds and code are original. Your own high scores stay in your browser; the world list keeps three letters, the score, the stage and the ship.
       <div class="legal"><a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
     </footer>
   </main>
